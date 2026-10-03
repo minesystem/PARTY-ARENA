@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>PARTY ARENA</title>
 
   <style>
@@ -10,66 +11,149 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: Arial, sans-serif;
+      font-family: Arial, Helvetica, sans-serif;
     }
 
     body {
       min-height: 100vh;
-      background: #0b0b12;
+      background:
+        radial-gradient(circle at top, #25105c 0%, #0d0b16 45%, #07070b 100%);
       color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
     }
 
     .app {
       width: 100%;
-      max-width: 500px;
+      max-width: 520px;
       min-height: 100vh;
-      padding: 30px 20px;
-      text-align: center;
+      margin: auto;
+      padding: 25px 18px;
       display: flex;
       flex-direction: column;
-      justify-content: center;
     }
 
-    .logo {
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 45px;
+    }
+
+    .brand {
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .status {
+      font-size: 12px;
+      padding: 7px 10px;
+      border-radius: 20px;
+      background: rgba(0, 255, 140, 0.1);
+      border: 1px solid rgba(0, 255, 140, 0.3);
+      color: #54ffad;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 35px;
+    }
+
+    .game-icon {
+      font-size: 70px;
+      margin-bottom: 15px;
+    }
+
+    h1 {
       font-size: 42px;
       font-weight: 900;
       letter-spacing: 2px;
-      margin-bottom: 8px;
     }
 
     .subtitle {
+      margin-top: 10px;
       color: #aaa;
-      margin-bottom: 40px;
+      font-size: 15px;
     }
 
-    .btn {
+    .buttons {
+      margin-top: 20px;
+    }
+
+    button {
       width: 100%;
-      padding: 17px;
-      margin: 8px 0;
       border: none;
-      border-radius: 14px;
-      font-size: 17px;
-      font-weight: bold;
-      color: white;
-      background: #6c3cff;
+      border-radius: 15px;
+      padding: 17px;
+      margin-bottom: 12px;
+      font-size: 16px;
+      font-weight: 800;
       cursor: pointer;
+      transition: 0.2s;
     }
 
-    .btn.secondary {
-      background: #1b1b27;
-      border: 1px solid #333344;
+    button:active {
+      transform: scale(0.98);
     }
 
-    .btn:hover {
-      opacity: 0.9;
+    .primary {
+      background: #7047ff;
+      color: white;
+      box-shadow: 0 8px 25px rgba(112, 71, 255, 0.25);
     }
 
-    .version {
-      margin-top: 30px;
-      color: #666;
+    .secondary {
+      background: #171521;
+      color: white;
+      border: 1px solid #302c40;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .card {
+      background: rgba(20, 18, 31, 0.9);
+      border: 1px solid #2b2738;
+      border-radius: 16px;
+      padding: 18px 12px;
+      text-align: center;
+    }
+
+    .card-icon {
+      font-size: 25px;
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .card-text {
+      color: #777;
+      font-size: 11px;
+      margin-top: 5px;
+    }
+
+    .footer {
+      margin-top: auto;
+      padding-top: 35px;
+      text-align: center;
+      color: #555;
+      font-size: 12px;
+    }
+
+    #message {
+      display: none;
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 10px;
+      background: #171521;
+      border: 1px solid #302c40;
+      color: #aaa;
       font-size: 13px;
     }
   </style>
@@ -77,44 +161,106 @@
 
 <body>
 
-  <div class="app">
+  <main class="app">
 
-    <div class="logo">🎮 PARTY ARENA</div>
+    <header class="top">
+      <div class="brand">🎮 PARTY ARENA</div>
+      <div class="status" id="firebaseStatus">
+        ● Connecting
+      </div>
+    </header>
 
-    <div class="subtitle">
-      Play. Compete. Have fun.
-    </div>
+    <section class="hero">
 
-    <button class="btn" onclick="createRoom()">
-      🎮 CREATE ROOM
-    </button>
+      <div class="game-icon">🎮</div>
 
-    <button class="btn secondary" onclick="joinRoom()">
-      🔑 JOIN ROOM
-    </button>
+      <h1>PARTY ARENA</h1>
 
-    <button class="btn secondary" onclick="leaderboard()">
-      🏆 LEADERBOARD
-    </button>
+      <p class="subtitle">
+        Play together. Compete together.
+      </p>
 
-    <div class="version">
+      <div class="buttons">
+
+        <button class="primary" onclick="createRoom()">
+          🎮 CREATE ROOM
+        </button>
+
+        <button class="secondary" onclick="joinRoom()">
+          🔑 JOIN ROOM
+        </button>
+
+        <button class="secondary" onclick="leaderboard()">
+          🏆 LEADERBOARD
+        </button>
+
+      </div>
+
+      <div id="message"></div>
+
+    </section>
+
+    <section class="cards">
+
+      <div class="card">
+        <div class="card-icon">👥</div>
+        <div class="card-title">MULTIPLAYER</div>
+        <div class="card-text">Play with friends</div>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">⚡</div>
+        <div class="card-title">MINI GAMES</div>
+        <div class="card-text">Fast and fun games</div>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🏆</div>
+        <div class="card-title">SCORES</div>
+        <div class="card-text">Earn points</div>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🔥</div>
+        <div class="card-title">COMPETE</div>
+        <div class="card-text">Climb the leaderboard</div>
+      </div>
+
+    </section>
+
+    <footer class="footer">
       PARTY ARENA • v1.0
-    </div>
+    </footer>
 
-  </div>
+  </main>
 
-  <script>
-    function createRoom() {
-      alert("Create Room coming next!");
+  <script type="module">
+
+    import { db } from "./firebase-config.js";
+
+    const status = document.getElementById("firebaseStatus");
+    const message = document.getElementById("message");
+
+    status.textContent = "● Firebase Ready";
+    status.style.color = "#54ffad";
+
+    function showMessage(text) {
+      message.textContent = text;
+      message.style.display = "block";
     }
 
-    function joinRoom() {
-      alert("Join Room coming next!");
-    }
+    window.createRoom = function() {
+      showMessage("🎮 Create Room system is coming next.");
+    };
 
-    function leaderboard() {
-      alert("Leaderboard coming next!");
-    }
+    window.joinRoom = function() {
+      showMessage("🔑 Join Room system is coming next.");
+    };
+
+    window.leaderboard = function() {
+      showMessage("🏆 Leaderboard system is coming next.");
+    };
+
   </script>
 
 </body>
