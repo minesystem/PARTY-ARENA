@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Party Arena - Room</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #090811;
+      color: white;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 520px;
+      min-height: 100vh;
+      margin: auto;
+      padding: 25px 18px;
+    }
+
+    .back {
+      background: none;
+      border: none;
+      color: #aaa;
+      font-size: 15px;
+      cursor: pointer;
+      margin-bottom: 35px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #888;
+      margin-bottom: 30px;
+    }
+
+    .panel {
+      background: #15131e;
+      border: 1px solid #292637;
+      border-radius: 18px;
+      padding: 22px;
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      color: #aaa;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    input {
+      width: 100%;
+      padding: 15px;
+      border-radius: 12px;
+      border: 1px solid #363144;
+      background: #0e0d15;
+      color: white;
+      font-size: 16px;
+      outline: none;
+      margin-bottom: 15px;
+    }
+
+    input:focus {
+      border-color: #7047ff;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 13px;
+      background: #7047ff;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .room-code {
+      text-align: center;
+      font-size: 40px;
+      font-weight: 900;
+      letter-spacing: 8px;
+      color: #9b7cff;
+      padding: 20px 0;
+    }
+
+    .players {
+      margin-top: 15px;
+    }
+
+    .player {
+      background: #0e0d15;
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 8px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .message {
+      text-align: center;
+      color: #ff7777;
+      margin-top: 15px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <button class="back" onclick="location.href='index.html'">
+    ← Back
+  </button>
+
+  <h1>🎮 GAME ROOM</h1>
+
+  <p class="subtitle">
+    Create a room for your friends
+  </p>
+
+  <div id="setupPanel" class="panel">
+
+    <label>Your player name</label>
+
+    <input
+      id="playerName"
+      type="text"
+      maxlength="20"
+      placeholder="Enter your name"
+    >
+
+    <button class="btn" onclick="createRoom()">
+      CREATE ROOM
+    </button>
+
+    <div id="error" class="message"></div>
+
+  </div>
+
+  <div id="roomPanel" class="hidden">
+
+    <div class="panel">
+
+      <p style="text-align:center;color:#888;">
+        ROOM CODE
+      </p>
+
+      <div id="roomCode" class="room-code">
+        ------
+      </div>
+
+      <p style="text-align:center;color:#777;font-size:13px;">
+        Give this code to your friends
+      </p>
+
+    </div>
+
+    <div class="panel">
+
+      <h3>👥 Players</h3>
+
+      <div id="players" class="players"></div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script type="module">
+
+  import {
+    db
+  } from "./firebase-config.js";
+
+  import {
+    collection,
+    doc,
+    setDoc,
+    onSnapshot,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+
+  function generateCode() {
+
+    const characters =
+      "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+    let code = "";
+
+    for (let i = 0; i < 6; i++) {
+      code += characters[
+        Math.floor(Math.random() * characters.length)
+      ];
+    }
+
+    return code;
+  }
+
+
+  window.createRoom = async function() {
+
+    const name =
+      document.getElementById("playerName").value.trim();
+
+    const error =
+      document.getElementById("error");
+
+    if (!name) {
+      error.textContent = "Enter your player name first.";
+      return;
+    }
+
+    error.textContent = "";
+
+    try {
+
+      let roomCode = generateCode();
+
+      const roomRef =
+        doc(db, "rooms", roomCode);
+
+      await setDoc(roomRef, {
+
+        code: roomCode,
+
+        host: name,
+
+        status: "waiting",
+
+        createdAt: serverTimestamp(),
+
+        players: {
+          [name]: {
+            name: name,
+            score: 0,
+            host: true
+          }
+        }
+
+      });
+
+      document.getElementById("setupPanel")
+        .classList.add("hidden");
+
+      document.getElementById("roomPanel")
+        .classList.remove("hidden");
+
+      document.getElementById("roomCode")
+        .textContent = roomCode;
+
+      listenToRoom(roomCode);
+
+    } catch (error) {
+
+      console.error(error);
+
+      document.getElementById("error")
+        .textContent =
+        "Could not create room. Check your Firebase Firestore setup.";
+
+    }
+
+  };
+
+
+  function listenToRoom(roomCode) {
+
+    const roomRef =
+      doc(db, "rooms", roomCode);
+
+    onSnapshot(roomRef, snapshot => {
+
+      if (!snapshot.exists()) return;
+
+      const data = snapshot.data();
+
+      const playersElement =
+        document.getElementById("players");
+
+      playersElement.innerHTML = "";
+
+      const players = data.players || {};
+
+      Object.values(players).forEach(player => {
+
+        const div =
+          document.createElement("div");
+
+        div.className = "player";
+
+        div.textContent =
+          (player.host ? "👑 " : "👤 ") +
+          player.name;
+
+        playersElement.appendChild(div);
+
+      });
+
+    });
+
+  }
+
+</script>
+
+</body>
+    </html>
